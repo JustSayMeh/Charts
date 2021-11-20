@@ -1,0 +1,53 @@
+﻿<Window x:Class="Charts.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Charts" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800"  KeyDown="Canvas_KeyDown" Name="MainWindowF" MouseWheel="Canvas_MouseWheel">
+    <DockPanel >
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="File">
+                <MenuItem Header="Open" Click="Open_Click"/>
+                <MenuItem Header="Save" Click="Save_Click"/>
+                <Separator />
+                <MenuItem Header="Close"/>
+            </MenuItem>
+        </Menu>
+        <DockPanel  Margin="10, 10">
+            <local:CustomCanvas x:Name="Canvas" HorizontalAlignment="Center" DockPanel.Dock="Left" ></local:CustomCanvas>
+            <StackPanel DockPanel.Dock="Left">
+                <ComboBox x:Name="comboBox" DataContext="{Binding .}" SelectionChanged="comboBox_SelectionChanged">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding TableName}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <xctk:ColorPicker Name="colorPicker" DisplayColorAndName="True" SelectedColorChanged="colorPicker_SelectedColorChanged"/>
+                <DataGrid x:Name="Grid" DataContext="{Binding .}"  HeadersVisibility="Column"  CanUserSortColumns="False" CanUserResizeRows="False"  
+                      CanUserResizeColumns="False" AutoGenerateColumns="False" 
+                      ColumnWidth="*" CanUserReorderColumns="False" SelectionUnit="FullRow" >
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="X">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox Text="{Binding X, Mode=TwoWay,  UpdateSourceTrigger=PropertyChanged}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Y">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+            </StackPanel>
+        </DockPanel>
+    </DockPanel>
+</Window>
