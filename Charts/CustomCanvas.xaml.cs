@@ -30,7 +30,7 @@ namespace Charts
         public double Step { get => 0.1 / Scale; }
         public Point Center { get => new(MainCanvas.Width / 2, MainCanvas.Height / 2); }
         public Point ViewCenter = new(0, 0);
-        double Scale = 1;
+        public double Scale = 1;
         public double ScaleX { get => 1 / (MainCanvas.Width/2); }
         public double ScaleY { get => - 1 / (MainCanvas.Height /2); }
         private List<IPointExporter> polylines = new();

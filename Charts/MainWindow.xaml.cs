@@ -187,5 +187,12 @@ namespace Charts
             name_to_shape[selectedItem.TableName].Points.Add(new Point(0, 0));
             Canvas.Update();
         }
+
+        private void CenterButton_Click(object sender, RoutedEventArgs e)
+        {
+            Canvas.ViewCenter = new(0, 0);
+            Canvas.Scale = 1;
+            Canvas.Update();
+        }
     }
 }
