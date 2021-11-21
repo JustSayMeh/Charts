@@ -28,7 +28,9 @@ namespace Charts
             Polyline polylineC = new();
             polylineC.Stroke = polyline.Stroke;
             polylineC.Opacity = polyline.Opacity;
-            return new PolylinePointExporter(polylineC);
+            PolylinePointExporter ret = new(polylineC);
+            ret.Name = Name;
+            return ret;
         }
 
         public IPointExporter NewInstance() => new PolylinePointExporter();

@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -65,9 +67,14 @@ namespace Charts
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            if (saveFileDialog.ShowDialog().Value)
+            {
+                Table table = (Table)comboBox.SelectedItem;
+                File.WriteAllText(saveFileDialog.FileName, table.ToString());
+            }
 
         }
-
         private void Open_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -79,7 +86,8 @@ namespace Charts
                     MessageBox.Show("Пустой файл!", "Файл не содержит данных", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
-                List<Point> list = new();
+                ObservableCollection<ObservablePoint> list = new();
+                string tableName = openFileDialog.SafeFileName.Split(".")[0];
                 for (int i = 1; i < file.Length; i++)
                 {
                     string line = file[i];
@@ -91,27 +99,41 @@ namespace Charts
                     }
                     try
                     {
-                        list.Add(new(double.Parse(coords[0]), double.Parse(coords[1])));
+                        ObservablePoint point = new(double.Parse(coords[0]), double.Parse(coords[1]));
+  
+                        list.Add(point);
                     }catch(Exception exp)
                     {
                         MessageBox.Show("Неверный формат файла!", "Файл не соответствует формату!", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
                 }
-                string tableName = openFileDialog.SafeFileName.Split(".")[0];
-                Table table = new(tableName, list);
+                
+                Table table = new(file[0], tableName, list);
                 tables.Add(table);
                 Polyline polyline = new Polyline();
-                foreach(var th in list)
+                IPointExporter exporter = new PolylinePointExporter(polyline);
+                foreach (var th in list)
                 {
-                    polyline.Points.Add(th);
+                    th.PropertyChanged += (t, e) =>
+                    {
+                        PointCollection pointC = new();
+                        foreach(var thp in list)
+                        {
+                            pointC.Add(thp.Point);
+                        }
+                        exporter.Points = pointC;
+                        Canvas.Update();
+                    };
+                    polyline.Points.Add(th.Point);
                 }
                 polyline.Stroke = Brushes.Black;
-                IPointExporter exporter = new PolylinePointExporter(polyline);
+                
                 exporter.Name = tableName;
                 name_to_shape.Add(tableName, exporter);
                 Canvas.Add(exporter);
-      
+                Controls.Visibility = Visibility.Visible;
+                comboBox.SelectedItem = table;
             }
         }
 
@@ -120,6 +142,7 @@ namespace Charts
             Table selectedItem = (Table)comboBox.SelectedItem;
             Grid.ItemsSource = selectedItem.TableItems;
             colorPicker.SelectedColor = name_to_shape[selectedItem.TableName].Color;
+
             MainWindowF.Focus();
         }
 
@@ -128,7 +151,41 @@ namespace Charts
             Table selectedItem = (Table)comboBox.SelectedItem;
             name_to_shape[selectedItem.TableName].Color = colorPicker.SelectedColor.Value;
             Canvas.Invalidate();
-      
+        }
+
+        private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            TextBox textBox = (TextBox)sender;
+            Regex regex = new Regex("^-?[0-9\\,]+$");
+            string newS = textBox.Text + e.Text;
+            e.Handled = !regex.IsMatch(newS);
+        }
+        private Point mouseCoord;
+        private void Canvas_MouseMove(object sender, MouseEventArgs e)
+        {
+            
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                var t = (Vector)mouseCoord - (Vector)e.GetPosition(Canvas);
+                t.X = -t.X;
+                Canvas.ViewCenter = (Point)((Vector)Canvas.ViewCenter + t * Canvas.Step / 10);
+                Trace.WriteLine("Down X: " + t.X);
+                Trace.WriteLine("Down Y: " + t.Y);
+                mouseCoord = e.GetPosition(Canvas);
+                Canvas.Update();
+            }
+            else
+            {
+                mouseCoord = e.GetPosition(Canvas);
+            }
+        }
+
+        private void AddButton_Click(object sender, RoutedEventArgs e)
+        {
+            Table selectedItem = (Table)comboBox.SelectedItem;
+            selectedItem.TableItems.Add(new ObservablePoint(0, 0));
+            name_to_shape[selectedItem.TableName].Points.Add(new Point(0, 0));
+            Canvas.Update();
         }
     }
 }

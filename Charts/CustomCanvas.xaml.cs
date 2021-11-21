@@ -36,7 +36,7 @@ namespace Charts
         private List<IPointExporter> polylines = new();
         private List<double> gridX = new();
         private List<double> gridY = new();
-
+        private Dictionary<string, IPointExporter> itemsDict = new();
         public CustomCanvas()
         {
             InitializeComponent();
@@ -58,9 +58,13 @@ namespace Charts
             {
                 pl.Points.Add(pointTransfrom(th));
             }
-
             MainCanvas.Children.Add(pl.Target);
             setLegend();
+        }
+
+        public void Update()
+        {
+            Invalidate();
         }
 
         private Point pointTransfrom(Point point)
@@ -100,13 +104,23 @@ namespace Charts
             List<IPointExporter> lines = new();
             foreach (double coord in gridX)
             {
-                Polyline polyline = createPoly(Brushes.Gray, new(coord, -1), new(coord, 1));
+                double coordX = coord + (ViewCenter.X * Scale - (int)(ViewCenter.X * Scale)) ;
+                if (coordX > 1)
+                    coordX -= 2;
+                else if (coordX < -1)
+                    coordX += 2;
+                Polyline polyline = createPoly(Brushes.Gray, new(coordX, -1), new(coordX, 1));
                 polyline.Opacity = 0.5;
                 lines.Add(new PolylinePointExporter(polyline));
             }
-            foreach (double coord in gridX)
+            foreach (double coord in gridY)
             {
-                Polyline polyline = createPoly(Brushes.Gray, new(-1, coord), new(1, coord));
+                double coordY = coord + (ViewCenter.Y * Scale - (int)(ViewCenter.Y * Scale)) ;
+                if (coordY > 1)
+                    coordY -= 2;
+                else if (coordY < -1)
+                    coordY += 2;
+                Polyline polyline = createPoly(Brushes.Gray, new(-1, coordY), new(1, coordY));
                 polyline.Opacity = 0.5;
                 lines.Add(new PolylinePointExporter(polyline));
             }
@@ -140,6 +154,7 @@ namespace Charts
                 Point p = (Point)(((Vector)th  + (Vector)ViewCenter) * Scale);
                 poly.Points.Add(p);
             }
+            itemsDict[line.Name] = poly;
             return poly;
         }
 
@@ -159,8 +174,13 @@ namespace Charts
             {
                 TextBlock textBlock = new();
                 textBlock.FontSize = 7;
-                Point point = new(coord, -1);
-                textBlock.Text = String.Format("{0:0.00}", (-ViewCenter.X + point.X / Scale) );
+                double coordX = coord + (ViewCenter.X * Scale - (int)(ViewCenter.X * Scale));
+                if (coordX > 1)
+                    coordX -= 2;
+                else if (coordX < -1)
+                    coordX += 2;
+                Point point = new(coordX, -1);
+                textBlock.Text = String.Format("{0:0.00}", (coordX / Scale - ViewCenter.X));
                 point = pointTransfrom(point);
                 Canvas.SetLeft(textBlock, point.X - 10);
                 Canvas.SetTop(textBlock, point.Y);
@@ -170,8 +190,13 @@ namespace Charts
             {
                 TextBlock textBlock = new();
                 textBlock.FontSize = 7;
-                Point point = new(1, coord);
-                textBlock.Text = String.Format("{0:0.00}", (-ViewCenter.Y + point.Y / Scale));
+                double coordY = coord + (ViewCenter.Y * Scale - (int)(ViewCenter.Y * Scale));
+                if (coordY > 1)
+                    coordY -= 2;
+                else if (coordY < -1)
+                    coordY += 2;
+                Point point = new(1, coordY);
+                textBlock.Text = String.Format("{0:0.00}", (coordY / Scale - ViewCenter.Y));
                 point = pointTransfrom(point);
                 Canvas.SetLeft(textBlock, point.X + 10);
                 Canvas.SetTop(textBlock, point.Y);

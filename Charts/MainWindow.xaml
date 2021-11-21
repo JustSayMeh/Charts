@@ -6,7 +6,10 @@
         xmlns:local="clr-namespace:Charts" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800"  KeyDown="Canvas_KeyDown" Name="MainWindowF" MouseWheel="Canvas_MouseWheel">
-    <DockPanel >
+    <Window.Resources>
+        <local:String2DoubleConverter  x:Key="S2Dconverter"/>
+    </Window.Resources>
+    <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
                 <MenuItem Header="Open" Click="Open_Click"/>
@@ -16,8 +19,9 @@
             </MenuItem>
         </Menu>
         <DockPanel  Margin="10, 10">
-            <local:CustomCanvas x:Name="Canvas" HorizontalAlignment="Center" DockPanel.Dock="Left" ></local:CustomCanvas>
-            <StackPanel DockPanel.Dock="Left">
+            
+            <local:CustomCanvas x:Name="Canvas" HorizontalAlignment="Center" DockPanel.Dock="Left" MouseMove="Canvas_MouseMove"></local:CustomCanvas>
+            <StackPanel DockPanel.Dock="Left" Visibility="Collapsed" x:Name="Controls">
                 <ComboBox x:Name="comboBox" DataContext="{Binding .}" SelectionChanged="comboBox_SelectionChanged">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
@@ -33,20 +37,20 @@
                         <DataGridTemplateColumn Header="X">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBox Text="{Binding X, Mode=TwoWay,  UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBox Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource S2Dconverter}}" PreviewTextInput="TextBox_PreviewTextInput"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                         <DataGridTemplateColumn Header="Y">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBox Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBox Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource S2Dconverter}}" PreviewTextInput="TextBox_PreviewTextInput"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
-
+                <Button x:Name="AddButton" Click="AddButton_Click" Margin="0,10">Добавить точку</Button>
             </StackPanel>
         </DockPanel>
     </DockPanel>
