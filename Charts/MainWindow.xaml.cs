@@ -183,8 +183,22 @@ namespace Charts
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
             Table selectedItem = (Table)comboBox.SelectedItem;
-            selectedItem.TableItems.Add(new ObservablePoint(0, 0));
+            ObservablePoint th = new ObservablePoint(0, 0);
+            selectedItem.TableItems.Add(th);
             name_to_shape[selectedItem.TableName].Points.Add(new Point(0, 0));
+            IPointExporter exporter = name_to_shape[selectedItem.TableName];
+  
+
+            th.PropertyChanged += (t, e) =>
+            {
+                PointCollection pointC = new();
+                foreach (var thp in selectedItem.TableItems)
+                {
+                    pointC.Add(thp.Point);
+                }
+                exporter.Points = pointC;
+                Canvas.Update();
+            };
             Canvas.Update();
         }
 
